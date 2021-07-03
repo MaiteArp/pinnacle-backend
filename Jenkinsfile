@@ -8,16 +8,12 @@ pipeline {
     }
   }
   stages {
-    stage('Init') {
-      steps {
-        checkout scm
-      }
-    }
+    
     stage('Build') {
       steps {
         sh '''
         python3 -m venv venv
-        source venv/bin/activate
+        . venv/bin/activate
         pip install -r requirements.txt
         '''
       }
