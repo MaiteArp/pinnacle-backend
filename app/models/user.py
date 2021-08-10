@@ -13,7 +13,7 @@ class User(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "password": self.password,
+            # "password": self.password,
             "coins": self.coins,
             "best_time": self.best_time,
         }

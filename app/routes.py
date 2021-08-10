@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, make_response
+from flask import Blueprint, request, jsonify, make_response, session
 from app import db
 from app.models.user import User
 from app.models.session import Session
@@ -47,26 +47,31 @@ Response: 200 Created. resturns JSON dict with key user,
 which value is in another dict detailing info (user id, name, password)
 '''
 
-@users_bp.route("/<id>", methods=["GET"])
-def get_single_user(id):
-    user = User.query.get(id)
+
+@users_bp.route("/login", methods=["POST"])
+def login_user():
+    request_body = request.get_json()
+    try:
+        user = User.query.filter(User.name==request_body['name'],
+                                User.password==request_body['password']).first()
+    except KeyError:
+        return make_response({
+            "details": "invalid data"
+            }, 400)
+    
     if user is None:
-        return make_response("", 404)
-    return {
-        "user": user.to_json()
-    }
+        return make_response("no user", 404)
+    response = make_response({
+                        "user": user.to_json()
+                    }, 200)
+    session['user_id'] = str(user.id) #session is dict we are setting key to id 
+    return response
 
-'''
-Request body: None, requested user specified in path.
-Action: Gets user of ID, returns 404 if no user found
-Response: 200 ok, returns JSON dict with key user and 
-value detailing info (user id, name, password)
-'''
 
-@users_bp.route("/<id>", methods=["PUT"])
+@users_bp.route("/<id>", methods=["PATCH"])
 def update_user(id):
     pass
-    
+
 # @users_bp.route("/<id>", methods=["DELETE"])
 # def delete_single_user(id):
 #     pass 

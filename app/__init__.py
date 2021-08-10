@@ -21,6 +21,8 @@ def create_app(test_config=None):
         app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get(
             "SQLALCHEMY_TEST_DATABASE_URI")
 
+
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
     # Import models here for Alembic setup
     # from app.models.ExampleModel import ExampleModel
 
