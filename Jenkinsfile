@@ -16,7 +16,9 @@ pipeline {
           python3 -m venv venv
           . venv/bin/activate
           pip install -r requirements.txt
-          pytest
+          pytest --junitxml=junit.xml
+          docker build -t docker.arpnetworking.com/capstone-backend .
+          docker push docker.arpnetworking.com/capstone-backend
           '''
         }
       }
@@ -24,9 +26,10 @@ pipeline {
   }
   post('Analysis') {
     always {
+      junit 'junit.xml'
       recordIssues(
           enabledForFailure: true, aggregatingResults: true,
-          tools: [pyLint()])
+          tools: [pyLint(), junitParser(pattern: 'junit.xml')])
     }
   }
 }
