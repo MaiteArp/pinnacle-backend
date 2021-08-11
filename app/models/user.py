@@ -5,7 +5,7 @@ class User(db.Model):
     name = db.Column(db.String)
     password = db.Column(db.String)
     coins = db.Column(db.Integer, default=0)
-    best_time = db.Column(db.Interval)
+    best_time = db.Column(db.Integer) # maybe should change this to Int and just store a number
     
 
 

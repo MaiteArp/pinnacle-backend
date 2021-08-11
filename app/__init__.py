@@ -6,7 +6,7 @@ import os
 from flask_cors import CORS # python: interpreter chose venv to resolve squiggly
 
 db = SQLAlchemy()
-migrate = Migrate()
+migrate = Migrate(compare_type=True)
 load_dotenv()
 
 def create_app(test_config=None):

@@ -39,14 +39,13 @@ def create_single_user():
         "user": new_user.to_json()
     }
     return make_response(jsonify(response), 201)
-
 '''
 Request Body: a JSON dict with 'name and 'password' 
 Action: Creates new user with said name and password. Throws 400 error if missing details
 Response: 200 Created. resturns JSON dict with key user, 
 which value is in another dict detailing info (user id, name, password)
 '''
-
+#############################################################################
 
 @users_bp.route("/login", methods=["POST"])
 def login_user():
@@ -65,16 +64,42 @@ def login_user():
                         "user": user.to_json()
                     }, 200)
     session['user_id'] = str(user.id) #session is dict we are setting key to id 
+    response.set_cookie('user_id', str(user.id)) #for react purposes
     return response
-
+'''
+Request Body: a JSON dict with name and password
+Action: Matches user to the body passed in, 
+Response: if no match returns no user, if match returns user dict and cookie
+'''
+##################################################################################
 
 @users_bp.route("/<id>", methods=["PATCH"])
-def update_user(id):
-    pass
+def update_user_best_time(id):
+    auth_user = int(session['user_id'])
+    if auth_user != int(id):
+        return make_response("", 403)
+    
+    request_body = request.get_json()
+    
+    user = User.query.get(id)
+    
+    if user is None:
+        return make_response("", 404)
+    user.best_time = request_body['best_time']
+    
+    db.session.commit()
 
-# @users_bp.route("/<id>", methods=["DELETE"])
-# def delete_single_user(id):
-#     pass 
+    return make_response(
+        {
+            "user": user.to_json()
+        })
+'''
+Write something here
+'''
+##################################################################################
+@users_bp.route("/<id>", methods=["DELETE"])
+def delete_single_user(id):
+    pass 
 #not sure I want to delete users
 
 

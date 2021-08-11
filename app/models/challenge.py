@@ -10,8 +10,8 @@ class Challenge(db.Model):
 
     winner = db.Column(db.Integer)# turn this to string
     
-    cha_time = db.Column(db.Interval)
-    sent_time = db.Column(db.Interval)
+    cha_time = db.Column(db.Integer)
+    sent_time = db.Column(db.Integer)
     # store incorrect questions
 
     def to_json(self):
