@@ -21,7 +21,7 @@ def get_health_check():
     }
     return make_response(jsonify(response), 200)
 
-############################################################################## CRUD
+############################################################################## USER CRUD
 
 @users_bp.route("", methods=["POST"])
 def create_single_user():
@@ -75,7 +75,11 @@ Response: if no match returns no user, if match returns user dict and cookie
 
 @users_bp.route("/<id>", methods=["PATCH"])
 def update_user_best_time(id):
-    auth_user = int(session['user_id'])
+    auth_user = -1
+    try:
+        auth_user = int(session['user_id'])
+    except KeyError:
+        return make_response("", 403)
     if auth_user != int(id):
         return make_response("", 403)
     
@@ -94,13 +98,44 @@ def update_user_best_time(id):
             "user": user.to_json()
         })
 '''
-Write something here
+Request Body: a JSON dict with user and best time
+Action: Matches user and updates their best time
+Response: if not authorixed user returns 403, 
+if no match returns no user, if match returns updated user dict and cookie
 '''
 ##################################################################################
-@users_bp.route("/<id>", methods=["DELETE"])
-def delete_single_user(id):
-    pass 
-#not sure I want to delete users
+
+@users_bp.route("/<id>/deposit", methods=["POST"])
+def deposit_user_coins(id):
+    auth_user = -1
+    try:
+        auth_user = int(session['user_id'])
+    except KeyError:
+        return make_response("", 403)
+    
+    if auth_user != int(id):
+        return make_response("", 403)
+    
+    request_body = request.get_json()
+
+    user = User.query.with_for_update().get(id) #'with_for_update()' locks the db row so noone can use the data until done updating
+
+    user.coins += request_body['amount']
+
+    db.session.commit()
+
+    return make_response(
+        {
+            "user": user.to_json()
+        })
+'''
+Request Body: a JSON dict with user and coin amount
+Action: Matches user and updates their coins
+Response: if not authorixed user returns 403, 
+if no match returns no user, if match returns updated user dict and cookie
+'''
+###################################################################################
+
 
 
 
