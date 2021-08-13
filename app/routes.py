@@ -136,6 +136,7 @@ Response: if not authorixed user returns 403,
 if no match returns no user, if match returns updated user dict and cookie
 '''
 ########################################################################### CHALLENGE CRUD
+
 @challenges_bp.route("", methods=["POST"])
 def issue_new_challenge():
     auth_user = -1
@@ -159,7 +160,7 @@ def issue_new_challenge():
     
     new_challenge = Challenge(
         challenger_id=auth_user,
-        destination_id=destination.id, # complaining about this
+        destination_id=destination.id, 
         sent_time=request_body["best_time"],
         winner=None,
     )
@@ -167,9 +168,13 @@ def issue_new_challenge():
     db.session.commit()
     return({"id":new_challenge.id}, 201) #might need this to answer the challenge
 '''
-Some guts
+Request Body: Json dict with 'challenged' and 'best_time'
+Action: finds the id of the user and makes a new challenge, sets winner to none
+Response: if not authorixed user returns 403, 
+if no match returns no user, the id of the new challenge, the dict and cookie
 '''
 ###################################################################################
+
 @challenges_bp.route("/check/<id>", methods=["GET"])
 def get_user_challenges(id):
     auth_user = -1
@@ -181,7 +186,7 @@ def get_user_challenges(id):
     if auth_user != int(id):
         return make_response("", 403)
 
-    request_body = request.get_json()
+    request_body = request.get_json() # I dont think this is needed
 
     try:
         challenges = Challenge.query.filter(Challenge.destination_id==auth_user, 
@@ -193,9 +198,13 @@ def get_user_challenges(id):
 
     return make_response({"challenges": [challenge.to_json() for challenge in challenges]}, 200) 
 '''
-Some guts in here 
+Request Body: no body
+Action: finds the id of the user and winner that is none in challenge table
+Response: if not authorixed user returns 403, 
+and a dict with key challenges and a list value with the challenges, the dict and cookie
 '''
 ###################################################################################
+
 @challenges_bp.route("/<id>", methods=["PATCH"])
 def update_challenge_winner(id):
     auth_user = -1  # creates auth user so it can be referenced, sets it to neg 1 so it wont ever be valid in the db 
@@ -222,7 +231,7 @@ def update_challenge_winner(id):
             "challenge": challenge.to_json()
         })
 '''
-Request Body: a JSON dict with user and best time
+Request Body: a JSON dict with everything and the 'winner'
 Action: Matches user and updates the winner
 Response: if not authorixed user returns 403, 
 if no match returns, if match returns updated user dict and cookie
