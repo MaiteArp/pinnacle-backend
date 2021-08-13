@@ -10,7 +10,7 @@ class Challenge(db.Model):
 
     winner = db.Column(db.Integer)# turn this to string
     
-    cha_time = db.Column(db.Integer)
+    cha_time = db.Column(db.Integer)# repsonse time
     sent_time = db.Column(db.Integer)
     # store incorrect questions
 
