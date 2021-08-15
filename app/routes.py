@@ -135,6 +135,26 @@ Action: Matches user and updates their coins
 Response: if not authorixed user returns 403, 
 if no match returns no user, if match returns updated user dict and cookie
 '''
+#############################################################################
+
+@users_bp.route("<id>", methods=["GET"])
+def get_username_from_id(id):
+    auth_user = -1
+    try:
+        auth_user = int(session['user_id'])
+    except KeyError:
+        return make_response("", 403)
+    
+    user = User.query.get(id)
+
+    if user:
+        return ({"name": user.name}, 200)
+    return ({"errors":[f"User {id} not Found"]}, 404)
+'''
+Request Body: 
+Action: 
+Response: 
+'''
 ########################################################################### CHALLENGE CRUD
 
 @challenges_bp.route("", methods=["POST"])
@@ -158,15 +178,18 @@ def issue_new_challenge():
     if destination is None:
         return make_response("no user to challenge found", 404)
     
-    new_challenge = Challenge(
+    challenge = Challenge( #here
         challenger_id=auth_user,
         destination_id=destination.id, 
         sent_time=request_body["best_time"],
         winner=None,
     )
-    db.session.add(new_challenge)
+    db.session.add(challenge) #here
     db.session.commit()
-    return({"id":new_challenge.id}, 201) #might need this to answer the challenge
+    return make_response(
+        {
+            "challenge": challenge.to_json() #made changes to this response
+        }, 201) #might need this to answer the challenge
 '''
 Request Body: Json dict with 'challenged' and 'best_time'
 Action: finds the id of the user and makes a new challenge, sets winner to none
@@ -211,9 +234,6 @@ def update_challenge_winner(id):
     try:
         auth_user = int(session['user_id'])
     except KeyError:
-        return make_response("", 403)
-
-    if auth_user != int(id):
         return make_response("", 403)
     
     request_body = request.get_json()
