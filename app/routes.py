@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, make_response, session
+from flask_bcrypt import Bcrypt
 from app import db
 from app.models.user import User
 from app.models.session import Session
@@ -6,7 +7,7 @@ from app.models.preference import Preference
 from app.models.challenge import Challenge
 from sqlalchemy import desc
 
-
+bcrypt = Bcrypt()
 users_bp = Blueprint('users', __name__, url_prefix="/app/users")
 sessions_bp = Blueprint('sessions', __name__, url_prefix="/app/sessions")
 preferences_bp = Blueprint('preferences', __name__, url_prefix="/app/preferences")
@@ -27,8 +28,9 @@ def get_health_check():
 def create_single_user():
     request_body = request.get_json()
     try:
+        password = bcrypt.generate_password_hash(request_body['password']).decode('utf-8')
         new_user = User(name=request_body['name'],
-                        password=request_body['password'])
+                        password=password)
     except KeyError:
         return make_response({
             "detials": "invalid data"
@@ -51,8 +53,9 @@ which value is in another dict detailing info (user id, name, password)
 def login_user():
     request_body = request.get_json()
     try:
-        user = User.query.filter(User.name==request_body['name'],
-                                User.password==request_body['password']).first()
+        user = User.query.filter(User.name==request_body['name']).first()
+        request_password = request_body['password']
+
     except KeyError:
         return make_response({
             "details": "invalid data"
@@ -60,12 +63,18 @@ def login_user():
     
     if user is None:
         return make_response("no user", 404)
-    response = make_response({
-                        "user": user.to_json()
-                    }, 200)
-    session['user_id'] = str(user.id) #session is dict we are setting key to id 
-    response.set_cookie('user_id', str(user.id)) #for react purposes
-    return response
+    actual_password = user.password
+
+    if bcrypt.check_password_hash(actual_password, request_password):
+        response = make_response({
+                            "user": user.to_json()
+                        }, 200)
+        session['user_id'] = str(user.id) #session is dict we are setting key to id 
+        response.set_cookie('user_id', str(user.id)) #for react purposes
+        return response
+    else:
+        return make_response("no user", 404)
+
 '''
 Request Body: a JSON dict with name and password
 Action: Matches user to the body passed in, 
@@ -256,3 +265,4 @@ Action: Matches user and updates the winner
 Response: if not authorixed user returns 403, 
 if no match returns, if match returns updated user dict and cookie
 '''
+################################################################################ PREFERENCES CRUD

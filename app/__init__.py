@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS # python: interpreter chose venv to resolve squiggly
@@ -11,6 +12,7 @@ load_dotenv()
 
 def create_app(test_config=None):
     app = Flask(__name__)
+    bcrypt = Bcrypt(app) # added for the bcrypt password thing
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     if test_config is None:
