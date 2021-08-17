@@ -99,8 +99,11 @@ def update_user_best_time(id):
     
     if user is None:
         return make_response("", 404)
-    user.best_time = request_body['best_time']
-    
+    if 'best_time' in request_body.keys():
+        user.best_time = request_body['best_time']
+    if 'theme' in request_body.keys():
+        user.theme = request_body['theme']
+
     db.session.commit()
 
     return make_response(
@@ -265,4 +268,4 @@ Action: Matches user and updates the winner
 Response: if not authorixed user returns 403, 
 if no match returns, if match returns updated user dict and cookie
 '''
-################################################################################ PREFERENCES CRUD
+################################################################################ 
