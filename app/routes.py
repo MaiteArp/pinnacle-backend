@@ -99,6 +99,7 @@ def update_user_best_time(id):
     
     if user is None:
         return make_response("", 404)
+        
     if 'best_time' in request_body.keys():
         user.best_time = request_body['best_time']
     if 'theme' in request_body.keys():

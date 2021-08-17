@@ -1,7 +1,7 @@
 from app.models.user import User
 
 
-def test_create_user(client, one_user):
+def test_create_user(client):
     #Act
     response = client.post("/app/users", json={
         "name": "Bob",
